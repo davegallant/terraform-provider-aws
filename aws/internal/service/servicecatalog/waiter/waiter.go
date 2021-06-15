@@ -43,6 +43,8 @@ const (
 
 	LaunchPathsReadyTimeout = 3 * time.Minute
 
+	PortfolioConstraintsReadyTimeout = 3 * time.Minute
+
 	StatusNotFound    = "NOT_FOUND"
 	StatusUnavailable = "UNAVAILABLE"
 
@@ -457,6 +459,23 @@ func LaunchPathsReady(conn *servicecatalog.ServiceCatalog, acceptLanguage, produ
 	outputRaw, err := stateConf.WaitForState()
 
 	if output, ok := outputRaw.([]*servicecatalog.LaunchPathSummary); ok {
+		return output, err
+	}
+
+	return nil, err
+}
+
+func PortfolioConstraintsReady(conn *servicecatalog.ServiceCatalog, acceptLanguage, portfolioID, productID string) ([]*servicecatalog.ConstraintDetail, error) {
+	stateConf := &resource.StateChangeConf{
+		Pending: []string{StatusNotFound},
+		Target:  []string{servicecatalog.StatusAvailable},
+		Refresh: PortfolioConstraintsStatus(conn, acceptLanguage, portfolioID, productID),
+		Timeout: PortfolioConstraintsReadyTimeout,
+	}
+
+	outputRaw, err := stateConf.WaitForState()
+
+	if output, ok := outputRaw.([]*servicecatalog.ConstraintDetail); ok {
 		return output, err
 	}
 
