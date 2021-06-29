@@ -390,7 +390,7 @@ func PortfolioConstraintsStatus(conn *servicecatalog.ServiceCatalog, acceptLangu
 		})
 
 		if tfawserr.ErrCodeEquals(err, servicecatalog.ErrCodeResourceNotFoundException) {
-			return nil, StatusNotFound, err
+			return nil, StatusNotFound, nil
 		}
 
 		if err != nil {
