@@ -99,6 +99,11 @@ func resourceAwsSyntheticsCanary() *schema.Resource {
 							ValidateFunc: validation.IntBetween(3, 14*60),
 							Default:      840,
 						},
+						"environment_variables": {
+							Type:     schema.TypeMap,
+							Optional: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
 					},
 				},
 			},
@@ -606,6 +611,12 @@ func expandAwsSyntheticsCanaryRunConfig(l []interface{}) *synthetics.CanaryRunCo
 
 	if v, ok := m["active_tracing"].(bool); ok {
 		codeConfig.ActiveTracing = aws.Bool(v)
+	}
+
+	if v, ok := m["environment_variables"].(map[string]interface{}); ok {
+		variables := readEnvironmentVariables(v)
+
+		codeConfig.EnvironmentVariables = aws.StringMap(variables)
 	}
 
 	return codeConfig
